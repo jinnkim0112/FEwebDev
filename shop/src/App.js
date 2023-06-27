@@ -1,17 +1,23 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {useState} from "react";
+import {createContext, useState} from "react";
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { Outlet, Route, Link, Routes, useNavigate } from 'react-router-dom';
 import DetailPage from './pages/detail.js';
 import shoeData from './data.js';
+import axios from 'axios';
 // import 배경 from './img/bg.png';
+
+export let Contex1 = createContext();
 
 function App() {
 
-  let [shoes] = useState(shoeData);
+  let [shoes, updateShoes] = useState(shoeData);
+  let [재고] = useState([10,11,12]);
+
+  let [getServer, updateGetServer] = useState(2);
   let navigate = useNavigate();
 
   return (
@@ -30,31 +36,51 @@ function App() {
       <Routes>
         <Route path='/' element={
           <>
-          <div className='main-bg'></div>
-          {/* <div style={{backgroundPosition: 'center', height : '600px', backgroundSize : 'cover', backgroundImage : 'url('+배경+')'}}></div> */}
-          <div className="container">
-            <div className="row">
-              {
-                shoes.map(function(x){
-                  return (
-                    <div className="col-md-4">
-                      <img src={"https://codingapple1.github.io/shop/shoes"+(x.id+1)+".jpg"} width="80%" />
-                      <h4>{x.title}</h4>
-                      <p>{x.price}</p>
-                    </div>
-                  )
-                })
+            <div className='main-bg'></div>
+            {/* <div style={{backgroundPosition: 'center', height : '600px', backgroundSize : 'cover', backgroundImage : 'url('+배경+')'}}></div> */}
+            <div className="container">
+              <div className="row">
+                {
+                  shoes.map(function(x){
+                    return (
+                      <div className="col-md-4" key={x}>
+                        <img src={"https://codingapple1.github.io/shop/shoes"+(x.id+1)+".jpg"} width="80%" />
+                        <h4>{x.title}</h4>
+                        <p>{x.price}</p>
+                      </div>
+                    )
+                  })
+                }
+              </div>
+            </div> 
+            <button onClick={()=>{
+              if(getServer>3) {
+                alert('no more products')
+                return
               }
-            </div>
-          </div> 
+              axios.get('https://codingapple1.github.io/shop/data'+getServer+'.json')
+              .then((result)=>{
+                let copy = [...shoes, ...result.data]
+                updateGetServer(getServer+1)
+                updateShoes(copy)
+              })
+              .catch(()=>{console.log('404 not found')})
+            }}>버튼</button>
           </>
         }/>
-        <Route path='/detail/:id' element={<DetailPage shoes={shoes}/>}/>
+        <Route path='/detail/:id' element={
+          <Contex1.Provider value={{재고}}>
+            <DetailPage shoes={shoes}/>
+          </Contex1.Provider>
+        }/>
         <Route path='/about' element={<About/>}>
           <Route path='member' element={<div>멤버페이지</div>}/>
           <Route path='location' element={<About/>}/>
         </Route>
 
+        <Route path='/cart' element={
+          <div></div>
+        }/>
 
         <Route path="*" element={<div>404 NotFound</div>}/>
       </Routes>
