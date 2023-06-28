@@ -1,6 +1,6 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {createContext, useState} from "react";
+import {createContext, useEffect, useState} from "react";
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
@@ -8,11 +8,21 @@ import { Outlet, Route, Link, Routes, useNavigate } from 'react-router-dom';
 import DetailPage from './pages/detail.js';
 import shoeData from './data.js';
 import axios from 'axios';
+import Cart from './pages/Cart.js'
 // import 배경 from './img/bg.png';
 
 export let Contex1 = createContext();
 
 function App() {
+
+  let obj = {name : 'kim'}
+  localStorage.setItem('data', JSON.stringify(obj))
+  let 꺼낸거 = localStorage.getItem('data')
+  let watch = []
+  
+  useEffect(()=>{
+    localStorage.setItem('watched', JSON.stringify(watch))
+  }, [])
 
   let [shoes, updateShoes] = useState(shoeData);
   let [재고] = useState([10,11,12]);
@@ -29,6 +39,7 @@ function App() {
             <Nav.Link onClick={()=>{navigate('/')}}>Home</Nav.Link>
             <Nav.Link onClick={()=>{navigate('/detail/0')}}>Pricing</Nav.Link>
             <Nav.Link onClick={()=>{navigate('/about')}}>About</Nav.Link>
+            <Nav.Link onClick={()=>{navigate('/cart')}}>Cart</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
@@ -43,7 +54,7 @@ function App() {
                 {
                   shoes.map(function(x){
                     return (
-                      <div className="col-md-4" key={x}>
+                      <div className="col-md-4" key={x} onClick={()=>{navigate('/detail/'+x.id)}}>
                         <img src={"https://codingapple1.github.io/shop/shoes"+(x.id+1)+".jpg"} width="80%" />
                         <h4>{x.title}</h4>
                         <p>{x.price}</p>
@@ -79,7 +90,7 @@ function App() {
         </Route>
 
         <Route path='/cart' element={
-          <div></div>
+          <Cart/>
         }/>
 
         <Route path="*" element={<div>404 NotFound</div>}/>

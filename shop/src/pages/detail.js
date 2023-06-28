@@ -4,6 +4,8 @@ import styled from "styled-components";
 import Nav from 'react-bootstrap/Nav';
 
 import {Contex1} from '../App.js';
+import { useDispatch } from "react-redux";
+import { addCart } from "../store.js";
 
 // let YellowBtn = styled.button`
 //   background : ${ props=>props.bg};
@@ -13,14 +15,16 @@ import {Contex1} from '../App.js';
 
 function DetailPage(props) {
 
-  let {재고} = useContext(Contex1) // 보통 사용 안함
+  // let {재고} = useContext(Contex1) // 보통 사용 안함
+
+  let dispatch = useDispatch()
 
   let [count, setCount] = useState(true);
   let [update, chgUpdate] = useState(0);
   let [tab, chgTab] = useState(0);
   // let [getInput, chgInput] = useState('');
   let {id} = useParams();
-  let shoe = props.shoes.find(x=>x.id==id);
+
   let [fade, setfade] = useState('')
   
   // mount, update시 일어나는 함수, html 렌더링 후에 사용된다.
@@ -39,7 +43,9 @@ function DetailPage(props) {
     }
   }, []) // 괄호 안이 바뀔 때만 바뀔때만 실행됨(즉, update시 실행x 가능)
 
-  if(0 <= id < props.shoes.length) {
+  if(0 <= id && id < props.shoes.length) {
+    let shoe = props.shoes.find(x=>x.id==id);
+
     return (
       <div className={'container start '+ fade}>
         {/* <YellowBtn onClick={()=>{chgUpdate(update+1)}}>{update}</YellowBtn> */}
@@ -61,7 +67,10 @@ function DetailPage(props) {
             <h4 className="pt-5">{shoe.title}</h4>
             <p>{shoe.content}</p>
             <p>{shoe.price}원</p>
-            <button className="btn btn-danger">주문하기</button> 
+            <button className="btn btn-danger" onClick={()=>{
+              let imsi = {id : shoe.id, name : shoe.title, count : 1}
+              dispatch(addCart(imsi))
+            }}>주문하기</button> 
           </div>
         </div>
 
@@ -81,9 +90,7 @@ function DetailPage(props) {
       </div> 
     )
   }
-  return (
-    <div>wrong page</div>
-  )
+  return <div>wrong page</div>
 }
 
 function TabContent({tab, shoe}){
